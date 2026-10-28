@@ -1,923 +1,634 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#07090a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="TEB Engine">
-<title>METABOLIST x TEB — Clinical Bioenergetic Engine</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-<style>
-:root {
---bg: #07090a; --card: #0e1215; --border: rgba(38,52,59,.8);
---green: #00e676; --coral: #ff6e59; --amber: #f59e0b; --blue: #3b82f6;
---text: #f8fafc; --muted: #94a3b8; --inset: #040506;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: calc(96px + env(safe-area-inset-bottom)); padding-top: env(safe-area-inset-top); }
-header { background: rgba(7,9,10,.95); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
-.brand { display: flex; align-items: center; gap: 12px; }
-.brand-icon { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, var(--coral), var(--green)); box-shadow: 0 0 15px rgba(0,230,118,.35); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; color: var(--bg); }
-.brand-title { font-size: 13px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
-main { max-width: 768px; width: 100%; margin: 0 auto; padding: 16px; }
-.page { display: none; } .page.active { display: block; }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
-.card-title { font-size: 13px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-.sub { font-size: 11px; font-weight: 700; color: var(--amber); text-transform: uppercase; margin: 14px 0 8px; letter-spacing: .5px; }
-.grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-@media (min-width: 600px) { .grid { grid-template-columns: 1fr 1fr; } }
-.row3 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); display: block; margin-bottom: 4px; }
-input, select, textarea { background: var(--inset); border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px; color: var(--text); font-size: 14px; width: 100%; outline: none; font-family: inherit; }
-textarea { min-height: 60px; resize: vertical; }
-input:focus, select:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 8px rgba(0,230,118,.35); }
-.seg { display: flex; background: var(--inset); border-radius: 10px; padding: 4px; border: 1px solid var(--border); }
-.seg-btn { flex: 1; padding: 9px; border: none; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; }
-.seg-btn.active { background: var(--green); color: var(--bg); font-weight: 700; }
-.checks { display: grid; grid-template-columns: 1fr; gap: 6px; }
-@media (min-width: 600px) { .checks { grid-template-columns: 1fr 1fr; } }
-.check { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); font-weight: 500; margin: 0; background: var(--inset); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px; cursor: pointer; }
-.check input { width: auto; margin: 0; accent-color: var(--green); }
-.btn { border: none; padding: 13px 16px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; width: 100%; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.btn:disabled { opacity: .5; cursor: not-allowed; }
-.btn-primary { background: linear-gradient(135deg, var(--coral), #e0533c); color: #fff; box-shadow: 0 4px 15px rgba(255,110,89,.35); }
-.btn-secondary { background: linear-gradient(135deg, var(--green), #00b36b); color: var(--bg); box-shadow: 0 4px 15px rgba(0,230,118,.35); }
-.btn-ghost { background: var(--inset); color: var(--muted); border: 1px solid var(--border); }
-.btn-small { width: auto; padding: 5px 10px; font-size: 10px; background: rgba(255,110,89,.15); color: var(--coral); border: 1px solid var(--coral); border-radius: 6px; cursor: pointer; }
-.btn-small.edit { background: rgba(59,130,246,.15); color: var(--blue); border-color: var(--blue); margin-right: 4px; }
-.status { font-size: 11px; color: var(--muted); margin-top: 8px; min-height: 14px; line-height: 1.5; }
-.status.err { color: var(--coral); }
-.muted { color: var(--muted); }
-.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
-.stat-card { background: rgba(7,9,10,.7); border: 1px solid var(--border); border-radius: 12px; padding: 12px 6px; text-align: center; }
-.stat-card label { margin-bottom: 2px; }
-.stat-val { font-size: 15px; font-weight: 800; margin-top: 4px; }
-.flag-box { border-radius: 10px; padding: 12px; font-size: 12px; line-height: 1.6; margin-bottom: 12px; }
-.flag-box b { display: block; margin-bottom: 4px; }
-.flag-block { background: rgba(255,110,89,.1); border: 1px solid var(--coral); }
-.flag-caution { background: rgba(245,158,11,.08); border: 1px solid var(--amber); }
-.table-wrap { overflow-x: auto; margin-top: 10px; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-th, td { padding: 9px 6px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
-th { color: var(--muted); font-size: 10px; text-transform: uppercase; }
-td.num, th.num { text-align: right; white-space: nowrap; }
-.badge { display: inline-block; padding: 3px 7px; border-radius: 6px; font-size: 9px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
-.badge-api { background: rgba(0,230,118,.15); color: var(--green); border: 1px solid var(--green); }
-.badge-vision { background: rgba(59,130,246,.15); color: var(--blue); border: 1px solid var(--blue); }
-.badge-user { background: rgba(245,158,11,.15); color: var(--amber); border: 1px solid var(--amber); }
-.badge-warn { background: rgba(255,110,89,.15); color: var(--coral); border: 1px solid var(--coral); }
-.src-link { color: var(--green); font-size: 10px; display: block; margin-top: 3px; text-decoration: none; }
-/* DROPDOWN ENGINE */
-.search-wrap { position: relative; }
-.dropdown {
-position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-background: #11161b; border: 1px solid var(--green); border-radius: 12px;
-max-height: 320px; overflow-y: auto; z-index: 999; display: none;
-box-shadow: 0 12px 35px rgba(0,0,0,.9);
-}
-.result-item {
-padding: 12px 14px; font-size: 12px; cursor: pointer;
-border-bottom: 1px solid rgba(255,255,255,.06); transition: background 0.15s ease;
-}
-.result-item:last-child { border-bottom: none; }
-.result-item:hover, .result-item:active { background: rgba(0,230,118,.18); }
-.result-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-.terminal { background: #030405; border: 1px solid var(--green); border-radius: 10px; padding: 12px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--green); min-height: 150px; max-height: 320px; overflow-y: auto; line-height: 1.6; }
-.terminal .bad { color: var(--coral); } .terminal .warn { color: var(--amber); }
-.chart-box { position: relative; height: 280px; }
-.resource { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
-.resource-title { font-size: 13px; font-weight: 700; color: var(--green); }
-.resource p { font-size: 12px; color: var(--muted); line-height: 1.5; }
-.resource a { font-size: 12px; color: var(--green); text-decoration: none; font-weight: 700; }
-.mandate { background: rgba(255,255,255,.03); border-left: 3px solid var(--coral); padding: 10px; margin-top: 12px; border-radius: 0 8px 8px 0; font-size: 12px; line-height: 1.6; }
-.disclaimer { font-size: 10px; color: var(--muted); margin-top: 14px; line-height: 1.5; }
-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,13,16,.96); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 6px 2px calc(6px + env(safe-area-inset-bottom)); z-index: 100; overflow-x: auto; }
-.nav-tab { background: transparent; border: none; color: var(--muted); font-size: 9px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px; flex: 1; min-width: 52px; }
-.nav-tab.active { color: var(--green); }
-@media print {
-header, nav, .no-print { display: none !important; }
-body { background: #fff; color: #000; padding: 0; }
-.page { display: block !important; }
-.card { box-shadow: none; border-color: #999; background: #fff; color: #000; }
-.card-title { color: #000; }
-.muted, .disclaimer { color: #333; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metabolist | Bioenergetic Intelligence Engine</title>
+    <style>
+        :root {
+            --bg-dark: #090a0f;
+            --bg-card: #13151c;
+            --bg-glass: rgba(19, 21, 28, 0.75);
+            --border-glass: rgba(212, 175, 55, 0.2);
+            --accent-gold: #d4af37;
+            --accent-gold-hover: #f3e5ab;
+            --accent-glow: rgba(212, 175, 55, 0.15);
+            --text-primary: #f8f9fa;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(212, 175, 55, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.02) 0%, transparent 40%);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2.5rem;
+            border-bottom: 1px solid var(--border-glass);
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            border: 2px solid var(--accent-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--accent-gold);
+            font-size: 0.9rem;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-status {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding: 0.35rem 0.85rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 680px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 20px var(--accent-glow);
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-container {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .step-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 10px var(--accent-glow);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2.5rem;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.85rem 1.75rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-gold);
+            color: var(--bg-dark);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-gold-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .metric-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .metric-sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .action-card {
+            background: rgba(212, 175, 55, 0.03);
+            border: 1px dashed var(--border-glass);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+        }
+
+        .action-card:hover {
+            background: rgba(212, 175, 55, 0.06);
+            border-color: var(--accent-gold);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent-gold);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .camera-simulation {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .camera-simulation::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-gold);
+            animation: scan 2s infinite ease-in-out;
+            opacity: 0.5;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .app-container {
+                padding: 1.5rem;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-<header>
-<div class="brand">
-<div class="brand-icon">M</div>
-<div class="brand-title">METABOLIST x TEB</div>
-</div>
-</header>
-<main>
-<!-- 1. BASELINE -->
-<section id="page-1" class="page active">
-<div class="card">
-<div class="card-title">1. Precision Delta & Biometrics</div>
-<div class="grid">
-<div>
-<label>Biological sex (energy estimate)</label>
-<div class="seg" id="sex-seg">
-<button class="seg-btn" data-sex="Female">Female</button>
-<button class="seg-btn" data-sex="Male">Male</button>
-</div>
-</div>
-<div><label for="p-age">Age (years)</label><input type="number" id="p-age" min="0" max="120"></div>
-<div><label for="p-height">Height (cm)</label><input type="number" id="p-height" min="50" max="260"></div>
-<div><label for="p-weight">Current weight (kg)</label><input type="number" id="p-weight" min="20" step="0.1"></div>
-<div><label for="p-delta">Target change (kg; negative = loss, positive = gain)</label><input type="number" id="p-delta" step="0.1"></div>
-<div>
-<label for="p-duration">Timeframe</label>
-<select id="p-duration">
-<option value="7">7-day metabolic sprint</option>
-<option value="14">14-day deep adaptation run</option>
-<option value="30">30-day maintenance walk</option>
-</select>
-</div>
-<div>
-<label for="p-activity">Activity factor</label>
-<select id="p-activity">
-<option value="1.2">Sedentary (1.2)</option>
-<option value="1.375">Light (1.375)</option>
-<option value="1.55">Moderate training (1.55)</option>
-<option value="1.725">Very active (1.725)</option>
-</select>
-</div>
-<div>
-<label for="p-clinical">TEB clinical mandate</label>
-<select id="p-clinical">
-<option value="diabetic">Diabetic / insulin resistance</option>
-<option value="masld">MASLD (hydrothermal)</option>
-<option value="cardiometabolic">Cardiometabolic low-dAGE</option>
-</select>
-</div>
-<div style="grid-column: 1 / -1;">
-<label for="p-note">Additional mandates from your clinician (free text)</label>
-<textarea id="p-note" placeholder="Enter any sequencing or other mandates your clinician sets. These are not applied automatically."></textarea>
-</div>
-</div>
-<div class="sub">Safety screen (tick any that apply)</div>
-<div class="checks">
-<label class="check"><input type="checkbox" class="scr" value="pregnant"> Pregnant or breastfeeding</label>
-<label class="check"><input type="checkbox" class="scr" value="eating"> Eating disorder (current or past)</label>
-<label class="check"><input type="checkbox" class="scr" value="dizzy"> Fainting or dizziness recently</label>
-<label class="check"><input type="checkbox" class="scr" value="ckd"> Reduced kidney function</label>
-<label class="check"><input type="checkbox" class="scr" value="heart"> Heart failure, recent heart attack or stroke</label>
-<label class="check"><input type="checkbox" class="scr" value="insulin"> Insulin or type 1 diabetes</label>
-<label class="check"><input type="checkbox" class="scr" value="meds"> Sulfonylurea, diuretic, lithium, anticoagulant or steroid</label>
-<label class="check"><input type="checkbox" class="scr" value="glp"> GLP-1 / GIP medicine or SGLT2 inhibitor</label>
-<label class="check"><input type="checkbox" class="scr" value="gout"> Gout or gallstones</label>
-<label class="check"><input type="checkbox" class="scr" value="other"> Thyroid, PCOS, liver disease or prior stomach/bariatric surgery</label>
-</div>
-<div id="plan-flags" style="margin-top:14px;"></div>
-<div id="plan-out"></div>
-<div class="status" id="baseline-status"></div>
-<div style="margin-top:14px;" class="no-print"><button class="btn btn-secondary" data-go="2">Next: RAFL Vault →</button></div>
-</div>
-</section>
-<!-- 2. RAFL VAULT -->
-<section id="page-2" class="page">
-<div class="stat-grid">
-<div class="stat-card"><label>Calories / target</label><div class="stat-val" id="dash-cal" style="color:var(--coral)">—</div></div>
-<div class="stat-card"><label>Protein / floor</label><div class="stat-val" id="dash-prot" style="color:var(--green)">—</div></div>
-<div class="stat-card"><label>RAFL items</label><div class="stat-val" id="dash-items" style="color:var(--amber)">0</div></div>
-</div>
-<div class="card no-print">
-<div class="card-title">Grounded search & photo ingestion</div>
-<div class="grid">
-<div class="search-wrap">
-<label for="search-input">Food search (Open Food Facts + Grounded Search)</label>
-<input type="text" id="search-input" placeholder="e.g. Woolworths seed bread, large egg" autocomplete="off">
-<div class="dropdown" id="search-drop"></div>
-</div>
-<div>
-<label>Photo (Vision label + AI estimate)</label>
-<div class="row3">
-<button class="btn btn-primary" id="btn-camera">Camera</button>
-<button class="btn btn-secondary" id="btn-gallery">Gallery</button>
-</div>
-<input type="file" id="camera-input" accept="image/*" capture="environment" hidden>
-<input type="file" id="gallery-input" accept="image/*" hidden>
-</div>
-</div>
-<div class="status" id="rafl-status"></div>
-<div class="sub">Manual entry</div>
-<div class="row3" style="grid-template-columns: 2fr 1fr;">
-<input type="text" id="m-name" placeholder="Item name">
-<input type="text" id="m-portion" placeholder="Portion">
-<input type="number" id="m-cal" placeholder="kcal" min="0">
-<input type="number" id="m-prot" placeholder="Protein g" min="0">
-</div>
-<div style="margin-top:8px;"><button class="btn btn-ghost" id="m-add">+ Add to vault</button></div>
-</div>
-<div class="card">
-<div class="card-title">Active RAFL inventory</div>
-<div class="table-wrap">
-<table>
-<thead><tr><th>Item</th><th>Portion</th><th class="num">Kcal</th><th class="num">Protein</th><th>Source</th><th></th></tr></thead>
-<tbody id="rafl-tbody"></tbody>
-</table>
-</div>
-<div class="disclaimer">AI estimate and Vision values are not verified nutrition data. Check each against the product label. Source links show what the grounded search used.</div>
-<div style="margin-top:14px;" class="no-print"><button class="btn btn-secondary" data-go="3">Next: Equipment →</button></div>
-</div>
-</section>
-<!-- 3. EQUIPMENT -->
-<section id="page-3" class="page">
-<div class="card">
-<div class="card-title">3. Equipment make & model</div>
-<div class="grid">
-<div><label for="eq-name">Machine name</label><input type="text" id="eq-name" placeholder="e.g. Technogym treadmill"></div>
-<div>
-<label for="eq-vector">Modality</label>
-<select id="eq-vector">
-<option value="Wall Pilates">Wall Pilates (joint-safe core)</option>
-<option value="Bodyweight Calisthenics">Bodyweight calisthenics</option>
-<option value="Resistance Machine">Resistance machine</option>
-<option value="Cardio / Recumbent">Cardio / recumbent bike</option>
-</select>
-</div>
-<div style="grid-column: 1 / -1;">
-<label for="eq-settings">Settings (from the machine label or your trainer)</label>
-<input type="text" id="eq-settings" placeholder="e.g. pin level 8 | seat position 3">
-</div>
-</div>
-<div class="row3" style="margin-top:14px;">
-<button class="btn btn-primary" id="btn-eq-scan">Scan make/model</button>
-<button class="btn btn-secondary" id="eq-add">Register</button>
-</div>
-<input type="file" id="eq-scan-input" accept="image/*" hidden>
-<div class="status" id="eq-status"></div>
-<div class="disclaimer">The scanner identifies a machine's make and model from text and logos. It does not set machine loads. Enter settings from the machine's label or your trainer, and confirm them before use.</div>
-</div>
-<div class="card">
-<div class="card-title">Equipment registry</div>
-<div class="table-wrap">
-<table>
-<thead><tr><th>Asset</th><th>Modality</th><th>Settings</th><th>Source</th><th></th></tr></thead>
-<tbody id="eq-tbody"></tbody>
-</table>
-</div>
-<div style="margin-top:14px;" class="no-print"><button class="btn btn-secondary" data-go="4">Next: Diagnostics →</button></div>
-</div>
-</section>
-<!-- 4. DIAGNOSTICS -->
-<section id="page-4" class="page">
-<div class="card">
-<div class="card-title">4. System diagnostics</div>
-<button class="btn btn-primary" id="diag-run">Run health check</button>
-<div class="terminal" id="terminal" style="margin-top:14px;">Ready. Run the health check to test the key, endpoints, storage and the plan engine.</div>
-<div style="margin-top:14px;" class="no-print"><button class="btn btn-secondary" data-go="5">Next: Trajectory →</button></div>
-</div>
-</section>
-<!-- 5. TRAJECTORY -->
-<section id="page-5" class="page">
-<div class="card no-print">
-<div class="card-title">Log a weigh-in</div>
-<div class="row3" style="grid-template-columns: 1fr 1fr auto;">
-<input type="number" id="w-day" placeholder="Day (0 = start)" min="0" step="1">
-<input type="number" id="w-kg" placeholder="Weight kg" step="0.1" min="20">
-<button class="btn btn-ghost" id="w-add" style="width:auto;">+</button>
-</div>
-<div class="status" id="w-status"></div>
-<div class="table-wrap" id="w-list"></div>
-</div>
-<div class="card">
-<div class="card-title">5. Weight & muscle delta trajectory</div>
-<div class="chart-box"><canvas id="weightChart"></canvas></div>
-<div class="status" id="chart-msg"></div>
-<div class="disclaimer">The planned line is a straight-line projection from the capped daily energy change. Real weight change varies with water, glycogen and adherence.</div>
-<div style="margin-top:14px;" class="no-print"><button class="btn btn-secondary" data-go="6">Next: Protocol →</button></div>
-</div>
-</section>
-<!-- 6. PROTOCOL -->
-<section id="page-6" class="page">
-<div class="card">
-<div class="card-title">
-<span>6. Synthesised TEB protocol</span>
-<button class="btn-small no-print" id="print-btn">Print</button>
-</div>
-<div id="protocol-out" style="font-size:13px; line-height:1.7;"></div>
-<div class="disclaimer">Decision-support summary only. Not medical advice. Targets are estimates and must be reviewed by the treating clinician or a registered dietitian before use, especially where any flag applies.</div>
-<div style="margin-top:14px;" class="no-print"><button class="btn btn-secondary" data-go="7">Resources →</button></div>
-</div>
-</section>
-<!-- 7. RESOURCES -->
-<section id="page-7" class="page">
-<div class="card">
-<div class="card-title">7. Clinical resources repository</div>
-<p class="muted" style="font-size:12px; margin-bottom:14px; line-height:1.5;">Joint-friendly movement guides. Check exercises with your clinician or a physiotherapist before starting, particularly after surgery or with joint or heart conditions.</p>
-<div class="resource">
-<div class="resource-title">Wall Pilates: pelvic tilts & spinal articulation</div>
-<p>Deep core engagement and spinal movement against a wall for support.</p>
-<a href="https://www.youtube.com/results?search_query=wall+pilates+core+spine+articulation" target="_blank" rel="noopener">Search video guides →</a>
-</div>
-<div class="resource">
-<div class="resource-title">Wall Pilates: supported squats & glute activation</div>
-<p>Uses the wall to keep knees tracking over the ankles. Stop if you feel knee pain.</p>
-<a href="https://www.youtube.com/results?search_query=wall+pilates+glute+activation+squats" target="_blank" rel="noopener">Search video guides →</a>
-</div>
-<div class="resource">
-<div class="resource-title">Low-impact shadow boxing circuit</div>
-<p>Rotational upper-body and core movement with low-impact footwork. Keep intensity within what your clinician has approved.</p>
-<a href="https://www.youtube.com/results?search_query=shadow+boxing+cardio+workout+no+equipment" target="_blank" rel="noopener">Search video guides →</a>
-</div>
-<div class="resource">
-<div class="resource-title">Joint mobility & functional calisthenics</div>
-<p>Full-range bodyweight flows for mobility. Start slowly during any deficit phase.</p>
-<a href="https://www.youtube.com/results?search_query=joint+friendly+calisthenics+mobility+flow" target="_blank" rel="noopener">Search video guides →</a>
-</div>
-</div>
-</section>
-</main>
-<nav class="no-print">
-<button class="nav-tab active" data-page="1">Baseline</button>
-<button class="nav-tab" data-page="2">RAFL</button>
-<button class="nav-tab" data-page="3">Equipment</button>
-<button class="nav-tab" data-page="4">Diagnostics</button>
-<button class="nav-tab" data-page="5">Trajectory</button>
-<button class="nav-tab" data-page="6">Protocol</button>
-<button class="nav-tab" data-page="7">Resources</button>
-</nav>
-<script>
-// ---------- Configuration ----------
-const CFG = {
-model: 'gemini-2.5-flash',
-apiBase: 'https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev', // Replace with deployed worker domain
-storeKey: 'teb_engine_state_v2',
-kcalPerKg: 7700,
-maxDailyDeficit: 1000,
-maxDailySurplus: 300,
-minKcal: { Female: 1200, Male: 1500 },
-proteinPerKg: 1.6,
-imageMaxPx: 1024,
-debounceMs: 350,
-seed: [{ name: 'Technogym Multistation V2', vector: 'Resistance Machine', settings: 'Pin level 8 | cable pulley mid-height', source: 'Seed' }]
-};
-const SCREEN = {
-pregnant: ['Pregnant or breastfeeding: no automated targets. Refer for medical review.', 'block'],
-eating: ['Eating disorder: no restriction targets. Refer to an eating-disorder specialist.', 'block'],
-dizzy: ['Recent fainting or dizziness: seek medical review before any dietary change.', 'block'],
-ckd: ['Reduced kidney function: protein and fluid targets must be set by a clinician.', 'block'],
-heart: ['Heart failure, recent heart attack or stroke: clinician-led plan only.', 'block'],
-insulin: ['Insulin or type 1 diabetes: calorie reduction changes insulin needs. Clinician must set the plan.', 'block'],
-meds: ['Sulfonylurea, diuretic, lithium, anticoagulant or steroid: review with prescriber.', 'caution'],
-glp: ['GLP-1 / GIP medicine or SGLT2 inhibitor: monitor with prescriber during intake changes.', 'caution'],
-gout: ['Gout or gallstones: fast or high-protein plans can trigger attacks or gallstone problems.', 'caution'],
-other: ['Thyroid, PCOS, liver disease or prior stomach/bariatric surgery: review expected rate with clinician.', 'caution']
-};
-const MANDATES = {
-diabetic: 'Diabetic / insulin resistance: prefer low-glycaemic-load foods (GL 10 or less per serving where possible).',
-masld: 'MASLD: hydrothermal moist cooking below 100°C.',
-cardiometabolic: 'Cardiometabolic: low-dAGE, moist, low-temperature cooking.'
-};
-const PROFILE_FIELDS = { age: 'p-age', height: 'p-height', weight: 'p-weight', delta: 'p-delta', duration: 'p-duration', activity: 'p-activity', clinical: 'p-clinical', mandateNote: 'p-note' };
-// ---------- Helpers ----------
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' }[c]));
-const toNum = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : null; };
-const fmt = v => (v == null ? '—' : v);
-const uid = () => Math.random().toString(36).slice(2, 10);
-const setStatus = (id, msg, err = false) => { const el = $(id); el.textContent = msg; el.className = 'status' + (err ? ' err' : ''); };
-const api = path => {
-if (CFG.apiBase.includes('YOUR-')) throw new Error('Proxy URL is not set in CFG.apiBase');
-return CFG.apiBase + path;
-};
-// ---------- State & Persistence ----------
-const DEFAULT_STATE = () => ({
-sex: 'Female',
-profile: { age: 37, height: 168, weight: 68, delta: -8, duration: 14, activity: 1.375, clinical: 'diabetic', mandateNote: '', screen: [] },
-rafl: [],
-equipment: CFG.seed.map(e => ({ ...e, id: uid() })),
-weighIns: []
-});
-function loadState() {
-try {
-const saved = JSON.parse(localStorage.getItem(CFG.storeKey));
-if (saved && typeof saved === 'object') {
-const base = DEFAULT_STATE();
-return { ...base, ...saved, profile: { ...base.profile, ...(saved.profile || {}) } };
-}
-} catch {}
-return DEFAULT_STATE();
-}
-let saveError = false;
-function save() {
-try {
-localStorage.setItem(CFG.storeKey, JSON.stringify(state));
-saveError = false;
-} catch {
-saveError = true;
-setStatus('baseline-status', 'Could not save to local storage.', true);
-}
-}
-const state = loadState();
-let plan = null;
-let chart = null;
-// ---------- Navigation ----------
-function switchPage(n) {
-document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.page == n));
-$(⁠page-${n}⁠).classList.add('active');
-window.scrollTo(0, 0);
-if (n === 5) renderChart();
-if (n === 6) renderProtocol();
-}
-// ---------- Profile & Plan ----------
-function syncInputsFromState() {
-for (const [k, id] of Object.entries(PROFILE_FIELDS)) $(id).value = state.profile[k] ?? '';
-document.querySelectorAll('.scr').forEach(c => { c.checked = state.profile.screen.includes(c.value); });
-document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.sex === state.sex));
-}
-function readInputsToState() {
-state.profile.age = toNum(￼
-￼('p-height').value);
-state.profile.weight = toNum(￼
-￼('p-delta').value);
-state.profile.duration = parseInt(￼
-￼('p-activity').value);
-state.profile.clinical = $('p-clinical').value;
-state.profile.mandateNote = $('p-note').value.trim();
-state.profile.screen = [...document.querySelectorAll('.scr:checked')].map(c => c.value);
-}
-function calcPlan() {
-const p = state.profile;
-const out = { ok: false, block: [], caution: [], mode: 'loss' };
-if (p.age == null || p.height == null || p.weight == null || p.delta == null) {
-out.block.push('Age, height, weight and target change are required.');
-return out;
-}
-const bmi = p.weight / Math.pow(p.height / 100, 2);
-if (p.age < 18) out.block.push('Under 18: refer to a paediatric clinician.');
-if (bmi < 18.5) out.block.push(⁠BMI ${bmi.toFixed(1)} is below 18.5: no weight-loss target.⁠);
-p.screen.forEach(k => {
-const [msg, level] = SCREEN[k] || [];
-if (msg) (level === 'block' ? out.block : out.caution).push(msg);
-});
-const sex = state.sex;
-const bmr = 10 * p.weight + 6.25 * p.height - 5 * p.age + (sex === 'Male' ? 5 : -161);
-const tdee = bmr * p.activity;
-const days = p.duration;
-let target;
-if (p.delta < 0) {
-out.mode = 'loss';
-const weeklyRate = -p.delta / (days / 7);
-const required = (-p.delta * CFG.kcalPerKg) / days;
-if (weeklyRate > 1) out.caution.push(⁠Requested rate of ${weeklyRate.toFixed(2)} kg/week is above 1 kg/week. Deficit capped at ${CFG.maxDailyDeficit} kcal/day.⁠);
-const deficit = Math.min(required, CFG.maxDailyDeficit);
-target = Math.round(tdee - deficit);
-const floor = CFG.minKcal[sex];
-if (target < floor) {
-target = floor;
-out.caution.push(⁠Target held at the ${floor} kcal floor. Intakes below this need clinician supervision.⁠);
-}
-} else if (p.delta > 0) {
-out.mode = 'gain';
-const required = (p.delta * CFG.kcalPerKg) / days;
-const surplus = Math.min(required, CFG.maxDailySurplus);
-target = Math.round(tdee + surplus);
-if (required > CFG.maxDailySurplus) out.caution.push(⁠Requested gain needs a ${Math.round(required)} kcal/day surplus. Capped at ${CFG.maxDailySurplus} kcal/day.⁠);
-else out.caution.push('Muscle-gain target: needs progressive resistance training and clinician review.');
-} else {
-out.mode = 'maintain';
-target = Math.round(tdee);
-out.caution.push('Requested change is zero: maintenance target only.');
-}
-const applied = Math.round(target - tdee);
-Object.assign(out, {
-bmi, bmr: Math.round(bmr), tdee: Math.round(tdee), target,
-energyDelta: applied,
-achievableKg: +Math.abs(applied * days / CFG.kcalPerKg).toFixed(1),
-requestedKg: p.delta,
-proteinFloor: Math.round(p.weight * CFG.proteinPerKg),
-ok: out.block.length === 0
-});
-return out;
-}
-function flagBoxes(block, caution) {
-const parts = [];
-if (block.length) parts.push(⁠<div class="flag-box flag-block"><b>Targets withheld: clinician review required</b>${block.map(x => '• ' + esc(x)).join('<br>')}</div>⁠);
-if (caution.length) parts.push(⁠<div class="flag-box flag-caution"><b>Caution: review before use</b>${caution.map(x => '• ' + esc(x)).join('<br>')}</div>⁠);
-return parts.join('');
-}
-function onProfileChange() {
-readInputsToState(); save();
-plan = calcPlan();
-renderPlan(); renderRaflStats();
-}
-function renderPlan() {
-$('plan-flags').innerHTML = flagBoxes(plan.block, plan.caution);
-if (!plan.ok) {
-$('plan-out').innerHTML = '';
-setStatus('baseline-status', 'Targets withheld until blocking flags are cleared.', true);
-return;
-}
-const dir = plan.mode === 'gain' ? 'gain' : 'loss';
-setStatus('baseline-status', ⁠BMI ${plan.bmi.toFixed(1)} · TDEE ${plan.tdee} kcal · Target ${plan.target} kcal⁠);
-$('plan-out').innerHTML = ⁠ <div class="stat-grid"> <div class="stat-card"><label>BMR</label><div class="stat-val">${plan.bmr} kcal</div></div> <div class="stat-card"><label>TDEE</label><div class="stat-val">${plan.tdee} kcal</div></div> <div class="stat-card"><label>Daily ${plan.mode === 'loss' ? 'deficit' : 'surplus'}</label><div class="stat-val">${Math.abs(plan.energyDelta)} kcal</div></div> <div class="stat-card"><label>Calorie target</label><div class="stat-val" style="color:var(--coral)">${plan.target} kcal</div></div> <div class="stat-card"><label>Achievable ${dir}</label><div class="stat-val">${plan.achievableKg} kg</div></div> <div class="stat-card"><label>Protein floor</label><div class="stat-val" style="color:var(--green)">${plan.proteinFloor} g</div></div> </div>⁠;
-}
-// ---------- Network Calls ----------
-async function gemini(prompt, grounded) {
-const res = await fetch(api('/api/gemini'), {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ prompt, grounded: !!grounded })
-});
-const data = await res.json().catch(() => ({}));
-if (!res.ok) throw new Error(data.error || ⁠HTTP ${res.status}⁠);
-return data;
-}
-async function vision(b64, features) {
-const res = await fetch(api('/api/vision'), {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ b64, features })
-});
-const data = await res.json().catch(() => ({}));
-if (!res.ok) throw new Error(data.error || ⁠HTTP ${res.status}⁠);
-return data;
-}
-function parseJsonLoose(text) {
-const cleaned = String(text || '').replace(/```(?:json)?/gi, '');
-const start = cleaned.search(/[[{]/);
-const end = Math.max(cleaned.lastIndexOf(']'), cleaned.lastIndexOf('}'));
-if (start < 0 || end <= start) return null;
-try { return JSON.parse(cleaned.slice(start, end + 1)); } catch { return null; }
-}
-function normaliseFoods(parsed) {
-if (!parsed) return [];
-const arr = Array.isArray(parsed) ? parsed : [parsed];
-return arr.filter(i => i && i.name).slice(0, 4).map(i => ({
-name: String(i.name),
-portion: String(i.portion || '1 serving'),
-cal: toNum(i.cal),
-protein: toNum(i.protein)
-}));
-}
-function imageToB64(file) {
-return new Promise((resolve, reject) => {
-const url = URL.createObjectURL(file);
-const img = new Image();
-img.onload = () => {
-URL.revokeObjectURL(url);
-const scale = Math.min(1, CFG.imageMaxPx / Math.max(img.width, img.height));
-const c = document.createElement('canvas');
-c.width = Math.round(img.width * scale);
-c.height = Math.round(img.height * scale);
-c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-resolve(c.toDataURL('image/jpeg', 0.85).split(',')[1]);
-};
-img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read image')); };
-img.src = url;
-});
-}
-// ---------- RAFL Vault Inventory ----------
-function addRafl(item) {
-state.rafl.push({
-id: uid(),
-name: String(item.name || 'Unnamed item'),
-portion: String(item.portion || '1 serving'),
-cal: item.cal == null ? null : Math.max(0, Math.round(item.cal)),
-protein: item.protein == null ? null : Math.max(0, Math.round(item.protein)),
-source: String(item.source || 'Manual'),
-sources: item.sources || []
-});
-save(); renderRafl();
-}
-function badgeFor(source) {
-if (/Vision|OCR|Label/.test(source)) return 'badge-vision';
-if (/Open Food|Google|AI/.test(source)) return 'badge-api';
-return 'badge-user';
-}
-function renderRafl() {
-const tb = ￼
-￼
-￼
-<td><strong>${esc(r.name)}</strong>${r.sources.map(s => `<a class="src-link" href="${esc(s.uri)}" target="_blank" rel="noopener">{esc(s.title)}</a>⁠).join('')}</td> <td>${esc(r.portion)}</td> <td class="num">${fmt(r.cal)}</td> <td class="num">${r.protein == null ? '—' : r.protein + 'g'}</td> <td><span class="badge ${badgeFor(r.source)}">${esc(r.source)}</span>${r.cal == null ? ' <span class="badge badge-warn">no values</span>' : ''}</td> <td style="white-space:nowrap"><button class="btn-small edit" data-edit="${r.id}">Edit</button><button class="btn-small" data-rm="${r.id}">X</button></td> </tr>⁠).join('')
-: '<tr><td colspan="6" class="muted" style="text-align:center;padding:16px;">No items loaded. Search, scan or add manually.</td></tr>';
-$('dash-items').textContent = state.rafl.length;
-renderRaflStats();
-}
-function renderRaflStats() {
-const cal = state.rafl.reduce((a, r) => a + (r.cal || 0), 0);
-const prot = state.rafl.reduce((a, r) => a + (r.protein || 0), 0);
-$('dash-cal').textContent = plan && plan.ok ? ⁠${cal} / ${plan.target}⁠ : ⁠${cal} / withheld⁠;
-$('dash-prot').textContent = ⁠${prot}g / ${plan && plan.ok ? plan.proteinFloor + 'g' : '—'}⁠;
-}
-$('rafl-tbody').addEventListener('click', e => {
-const rm = e.target.closest('[data-rm]');
-const ed = e.target.closest('[data-edit]');
-if (rm) {
-state.rafl = state.rafl.filter(r => r.id !== rm.dataset.rm);
-save(); renderRafl();
-} else if (ed) {
-const item = state.rafl.find(r => r.id === ed.dataset.edit);
-if (!item) return;
-const cal = prompt(⁠Kcal for ${item.name}⁠, item.cal ?? '');
-const prot = prompt(⁠Protein g for ${item.name}⁠, item.protein ?? '');
-if (cal !== null && cal.trim() !== '' && toNum(cal) != null) item.cal = Math.max(0, Math.round(toNum(cal)));
-if (prot !== null && prot.trim() !== '' && toNum(prot) != null) item.protein = Math.max(0, Math.round(toNum(prot)));
-item.source = item.source.includes('(edited)') ? item.source : item.source + ' (edited)';
-save(); renderRafl();
-}
-});
-$('m-add').addEventListener('click', () => {
-const name = ￼
-￼
-addRafl({ name, portion: $('m-portion').value.trim() || '1 serving', cal: toNum($('m-cal').value), protein: toNum(('m-prot').value), source: 'Manual' });
-['m-name', 'm-portion', 'm-cal', 'm-prot'].forEach(id => { $(id).value = ''; });
-setStatus('rafl-status', 'Added manually.');
-});
-// ---------- Food Search & Live Dropdown ----------
-const OFF_BASE = 'https://world.openfoodfacts.org';
-function offToItems(p) {
-const n = p.nutriments || {};
-let kcal100 = toNum(n['energy-kcal_100g']);
-if (kcal100 == null && toNum(n['energy_100g']) != null) kcal100 = toNum(n['energy_100g']) / 4.184;
-const prot100 = toNum(n['proteins_100g']);
-if (kcal100 == null && prot100 == null) return [];
-const name = [p.product_name, p.brands].filter(Boolean).join(' · ') || 'Unnamed product';
-const sources = [{ uri: ⁠${OFF_BASE}/product/${p.code}⁠, title: 'Open Food Facts' }];
-const make = (portion, factor) => ({
-name, portion,
-cal: kcal100 == null ? null : Math.round(kcal100 * factor),
-protein: prot100 == null ? null : +(prot100 * factor).toFixed(1),
-source: 'Open Food Facts', sources
-});
-const out = [make('100 g', 1)];
-const serving = toNum(p.serving_quantity);
-if (serving) out.push(make(p.serving_size || ⁠${serving} g⁠, serving / 100));
-return out;
-}
-async function offSearch(q) {
-const res = await fetch(api('/api/off/search?q=' + encodeURIComponent(q)));
-const data = await res.json().catch(() => ({}));
-if (!res.ok) throw new Error(data.error || ⁠HTTP ${res.status}⁠);
-return (data.products || []).flatMap(offToItems).slice(0, 12);
-}
-async function googleSearch(q) {
-const prompt = ⁠Find typical nutrition for: "${q}". Return ONLY a JSON array of up to 4 objects with keys "name" (string), "portion" (string, e.g. "100g"), "cal" (number, kcal), "protein" (number, grams). Return [] if no match.⁠;
-const r = await gemini(prompt, true);
-return normaliseFoods(parseJsonLoose(r.text)).map(it => ({ ...it, source: 'Google Search (grounded)', sources: r.sources }));
-}
-async function findFood(q) {
-const [off, goo] = await Promise.allSettled([offSearch(q), googleSearch(q)]);
-const notes = [];
-const offItems = off.status === 'fulfilled' ? off.value : [];
-const gooItems = goo.status === 'fulfilled' ? goo.value : [];
-if (off.status === 'rejected') notes.push(⁠Open Food Facts unavailable: ${off.reason.message}⁠);
-if (goo.status === 'rejected') notes.push(⁠Google Search unavailable: ${goo.reason.message}⁠);
-return { items: [...offItems, ...gooItems], notes };
-}
-let searchTimer = null;
-let searchSeq = 0;
-const searchInput = $('search-input');
-const searchDrop = $('search-drop');
-function renderResults(q, items, notes = []) {
-searchDrop.innerHTML = '';
-notes.forEach(n => {
-const d = document.createElement('div');
-d.className = 'result-item';
-d.style.color = 'var(--amber)';
-d.textContent = n;
-searchDrop.appendChild(d);
-});
-if (!items.length && !notes.length) {
-const d = document.createElement('div');
-d.className = 'result-item';
-d.textContent = ⁠No matches found for "${q}".⁠;
-searchDrop.appendChild(d);
-$('m-name').value = q;
-}
-items.forEach(it => {
-const row = document.createElement('div');
-row.className = 'result-item';
-row.setAttribute('data-item-json', JSON.stringify(it));
-row.innerHTML = ⁠ <div class="result-top"> <div> <strong>${esc(it.name)}</strong> (${esc(it.portion)})<br> <span class="badge ${badgeFor(it.source)}">${esc(it.source)}</span> </div> <div style="color:var(--green); font-weight:700; white-space:nowrap;"> ${fmt(it.cal)} kcal · ${fmt(it.protein)}g P </div> </div>⁠;
-searchDrop.appendChild(row);
-});
-searchDrop.style.display = 'block';
-}
-async function runSearch(q) {
-const seq = ++searchSeq;
-searchDrop.style.display = 'block';
-searchDrop.innerHTML = '<div class="result-item muted">Searching databases...</div>';
-const { items, notes } = await findFood(q);
-if (seq !== searchSeq) return;
-renderResults(q, items, notes);
-}
-searchInput.addEventListener('input', e => {
-const q = e.target.value.trim();
-clearTimeout(searchTimer);
-if (q.length < 2) { searchDrop.style.display = 'none'; return; }
-searchTimer = setTimeout(() => runSearch(q), CFG.debounceMs);
-});
-searchDrop.addEventListener('pointerdown', e => {
-const target = e.target.closest('.result-item');
-if (!target) return;
-e.preventDefault();
-e.stopPropagation();
-const rawJson = target.getAttribute('data-item-json');
-if (rawJson) {
-const item = JSON.parse(rawJson);
-addRafl(item);
-searchInput.value = '';
-searchDrop.style.display = 'none';
-setStatus('rafl-status', ⁠Added ${item.name} to vault.⁠);
-}
-});
-document.addEventListener('pointerdown', e => {
-if (!e.target.closest('.search-wrap')) {
-searchDrop.style.display = 'none';
-}
-});
-// ---------- Photo Ingestion ----------
-async function photoPipeline(file) {
-setStatus('rafl-status', 'Processing image...');
-try {
-const b64 = await imageToB64(file);
-const r = await vision(b64, [{ type: 'TEXT_DETECTION', maxResults: 1 }, { type: 'LABEL_DETECTION', maxResults: 3 }]);
-const text = r.textAnnotations?.[0]?.description || '';
-const label = r.labelAnnotations?.[0]?.description || '';
-if (label) {
-searchInput.value = label;
-runSearch(label);
-setStatus('rafl-status', ⁠Identified label: "${label}"⁠);
-} else {
-setStatus('rafl-status', 'Could not identify item from photo.', true);
-}
-} catch (err) {
-setStatus('rafl-status', ⁠Photo scanning failed: ${err.message}⁠, true);
-}
-}
-$('btn-camera').addEventListener('click', () => $('camera-input').click());
-$('btn-gallery').addEventListener('click', () => $('gallery-input').click());
-$('camera-input').addEventListener('change', e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) photoPipeline(f); });
-$('gallery-input').addEventListener('change', e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) photoPipeline(f); });
-// ---------- Equipment Registry ----------
-function renderEquipment() {
-const tb = $('eq-tbody');
-tb.innerHTML = state.equipment.length ? state.equipment.map(eq => ⁠ <tr> <td>${esc(eq.name)}</td> <td>${esc(eq.vector)}</td> <td>${eq.settings ? esc(eq.settings) : '<span class="muted">Not set</span>'}</td> <td><span class="badge ${String(eq.source).startsWith('Vision') ? 'badge-vision' : 'badge-user'}">${esc(eq.source)}</span></td> <td style="white-space:nowrap"><button class="btn-small edit" data-eq-edit="${eq.id}">Edit</button><button class="btn-small" data-eq="${eq.id}">X</button></td> </tr>⁠).join('')
-: '<tr><td colspan="5" class="muted" style="text-align:center;padding:16px;">No equipment registered.</td></tr>';
-}
-$('eq-tbody').addEventListener('click', e => {
-const rm = e.target.closest('[data-eq]');
-const ed = e.target.closest('[data-eq-edit]');
-if (rm) {
-state.equipment = state.equipment.filter(x => x.id !== rm.dataset.eq);
-save(); renderEquipment();
-} else if (ed) {
-const eq = state.equipment.find(x => x.id === ed.dataset.eqEdit);
-if (!eq) return;
-const s = prompt(⁠Settings for ${eq.name}⁠, eq.settings || '');
-if (s !== null) { eq.settings = s.trim(); save(); renderEquipment(); }
-}
-});
-$('eq-add').addEventListener('click', () => {
-const name = $('eq-name').value.trim();
-if (!name) { setStatus('eq-status', 'Enter equipment name.', true); return; }
-state.equipment.push({ id: uid(), name, vector: $('eq-vector').value, settings: $('eq-settings').value.trim(), source: 'Manual' });
-save(); $('eq-name').value = ''; $('eq-settings').value = '';
-setStatus('eq-status', 'Registered.'); renderEquipment();
-});
-$('btn-eq-scan').addEventListener('click', () => $('eq-scan-input').click());
-$('eq-scan-input').addEventListener('change', async e => {
-const file = e.target.files?.[0]; e.target.value = '';
-if (!file) return;
-setStatus('eq-status', 'Reading machine label...');
-try {
-const b64 = await imageToB64(file);
-const r = await vision(b64, [{ type: 'TEXT_DETECTION', maxResults: 1 }]);
-const name = r.textAnnotations?.[0]?.description?.split('\n')[0] || 'Unidentified machine';
-state.equipment.push({ id: uid(), name, vector: $('eq-vector').value, settings: '', source: 'Vision (verify)' });
-save(); renderEquipment();
-setStatus('eq-status', ⁠Detected "${name}".⁠);
-} catch (err) {
-setStatus('eq-status', ⁠Scan failed: ${err.message}⁠, true);
-}
-});
-// ---------- Diagnostics ----------
-$('diag-run').addEventListener('click', async () => {
-const t = $('terminal');
-const add = (cls, msg) => t.insertAdjacentHTML('beforeend', ⁠<div class="${cls}">${esc(msg)}</div>⁠);
-t.innerHTML = '';
-add('', '[DIAGNOSTIC] Probing API Worker connection...');
-if (CFG.apiBase.includes('YOUR-')) {
-add('bad', 'Proxy URL not set. Deploy Worker proxy and update CFG.apiBase.');
-return;
-}
-add(typeof Chart !== 'undefined' ? '' : 'bad', typeof Chart !== 'undefined' ? 'Chart.js engine: loaded' : 'Chart.js engine: missing');
-try { localStorage.setItem('teb_probe', '1'); localStorage.removeItem('teb_probe'); add('', 'Storage integrity: writable'); }
-catch { add('bad', 'Storage integrity: read-only or disabled'); }
-const pl = calcPlan();
-add(pl.ok ? '' : 'warn', pl.ok ? ⁠Plan engine: output target ${pl.target} kcal⁠ : ⁠Plan engine: withheld (${pl.block.length} flags)⁠);
-try {
-const res = await fetch(api('/api/health'));
-const h = await res.json().catch(() => ({}));
-if (!res.ok) throw new Error(h.error || ⁠HTTP ${res.status}⁠);
-add(h.keyConfigured ? '' : 'bad', h.keyConfigured ? 'Proxy key: configured' : 'Proxy key: GOOGLE_API_KEY missing');
-} catch (err) {
-add('bad', ⁠Proxy health check failed: ${err.message}⁠);
-}
-add('', '[DIAGNOSTIC COMPLETE]');
-});
-// ---------- Trajectory Charting & Weigh-ins ----------
-function renderWeighList() {
-const el = ￼
-￼
-? `<table><thead><tr><th>Day</th><th class="num">kg</th><th></th></tr></thead><tbody>${
-￼{w.day}</td><td class="num">${w.kg}</td><td><button class="btn-small" data-w="${w.id}">X</button></td></tr>⁠).join('') }</tbody></table>⁠
-: '<p class="muted" style="font-size:12px;">No weigh-ins logged yet.</p>';
-}
-$('w-list').addEventListener('click', e => {
-const b = e.target.closest('[data-w]');
-if (!b) return;
-state.weighIns = state.weighIns.filter(w => w.id !== b.dataset.w);
-save(); renderWeighList(); renderChart();
-});
-('w-add').addEventListener('click', () => {
-￼('w-day').value, 10);
-const kg = toNum($('w-kg').value);
-if (!Number.isFinite(day) || day < 0 || kg == null) { setStatus('w-status', 'Enter valid day number and weight.', true); return; }
-state.weighIns.push({ id: uid(), day, kg });
-state.weighIns.sort((a, b) => a.day - b.day);
-save(); $('w-day').value = ''; $('w-kg').value = '';
-setStatus('w-status', ⁠Logged ${kg} kg on D${day}.⁠);
-renderWeighList(); renderChart();
-});
-function renderChart() {
-setStatus('chart-msg', '');
-if (typeof Chart === 'undefined') { setStatus('chart-msg', 'Chart library unavailable.', true); return; }
-const p = state.profile;
-if (p.weight == null || p.delta == null || !p.duration) return;
-const pl = calcPlan();
-const days = p.duration;
-const labels = Array.from({ length: days + 1 }, (, d) => 'D' + d);
-const sign = pl.mode === 'gain' ? 1 : -1;
-const requested = labels.map((, d) => +(p.weight + p.delta * d / days).toFixed(2));
-const planned = labels.map((, d) => pl.ok ? +(p.weight + sign * pl.achievableKg * d / days).toFixed(2) : null);
-const actual = labels.map((, d) => {
-const w = state.weighIns.filter(x => x.day === d).pop();
-return w ? w.kg : null;
-});
-if (chart) chart.destroy();
-chart = new Chart($('weightChart').getContext('2d'), {
-type: 'line',
-data: {
-labels,
-datasets: [
-{ label: 'Requested (kg)', data: requested, borderColor: '#ff6e59', borderDash: [6, 6], borderWidth: 2, pointRadius: 0, fill: false },
-{ label: 'Planned Target (kg)', data: planned, borderColor: '#00e676', backgroundColor: 'rgba(0,230,118,.1)', borderWidth: 3, pointRadius: 0, fill: 'origin' },
-{ label: 'Logged Weight (kg)', data: actual, borderColor: '#3b82f6', backgroundColor: '#3b82f6', showLine: false, pointRadius: 5 }
-]
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: { legend: { labels: { color: '#fff' } } },
-scales: {
-x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,.05)' } },
-y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,.05)' } }
-}
-}
-});
-}
-// ---------- Protocol Synthesis ----------
-function renderProtocol() {
-const out = $('protocol-out');
-const p = state.profile;
-const pl = calcPlan();
-if (!pl.ok) {
-out.innerHTML = flagBoxes(pl.block, pl.caution) + '<p>Targets withheld pending clinician review.</p>';
-return;
-}
-const cal = state.rafl.reduce((a, r) => a + (r.cal || 0), 0);
-const prot = state.rafl.reduce((a, r) => a + (r.protein || 0), 0);
-const last = state.weighIns[state.weighIns.length - 1];
-out.innerHTML = ⁠<p style="color:var(--green); font-weight:700; margin-bottom:8px;">TEB Clinical Synthesis (${p.duration}-Day Plan)</p> <p><strong>Biometric Context:</strong> ${esc(state.sex)}, ${p.age} yrs, BMI ${pl.bmi.toFixed(1)}, Activity Factor ${p.activity}</p> <p><strong>Energy Dynamics:</strong> Requested Delta ${p.delta} kg | Capped Achievable ${pl.achievableKg} kg</p> <p><strong>Calorie Target:</strong> ${pl.target} kcal/day (Logged Inventory: ${cal} kcal)</p> <p><strong>Protein Floor Target:</strong> ${pl.proteinFloor} g/day (Logged Inventory: ${prot} g)</p> <p><strong>Latest Weigh-in:</strong> ${last ?⁠D${last.day}: ${last.kg} kg⁠: 'None recorded'}</p> <div class="mandate"> <strong>Preparation Mandate:</strong> Hydrothermal moist cooking below 100°C to limit dAGE formation.<br> <strong>Clinical Vector:</strong> ${esc(MANDATES[p.clinical] || '')} ${p.mandateNote ?⁠
-<strong>Clinician Notes:</strong> ${esc(p.mandateNote)}⁠ : ''} </div> ${pl.caution.length ? flagBoxes([], pl.caution) : ''}⁠;
-}
-$('print-btn').addEventListener('click', () => window.print());
-// ---------- Initialization ----------
-document.querySelectorAll('.seg-btn').forEach(btn => btn.addEventListener('click', () => {
-state.sex = btn.dataset.sex;
-document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b === btn));
-onProfileChange();
-}));
-document.querySelectorAll('#page-1 input, #page-1 select, #page-1 textarea').forEach(el => {
-el.addEventListener('input', onProfileChange);
-el.addEventListener('change', onProfileChange);
-});
-document.querySelectorAll('.nav-tab').forEach(t => t.addEventListener('click', () => switchPage(+t.dataset.page)));
-document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => switchPage(+b.dataset.go)));
-syncInputsFromState();
-onProfileChange();
-renderRafl();
-renderEquipment();
-renderWeighList();
-</script>
+
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">M</div>
+            <div class="logo-text">METABOLIST</div>
+        </div>
+        <div class="nav-status" id="navStatus">Onboarding: Step 1 of 6</div>
+    </header>
+
+    <main>
+        <div class="app-container">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width: 16.66%;"></div>
+            </div>
+
+            <!-- STEP 1: Core Identity & Biometrics -->
+            <div class="step-container active" id="step1">
+                <h2>Core Identity & Biometrics</h2>
+                <p class="subtitle">Establish your foundational bioenergetic surface parameters for sovereign metabolic optimization.</p>
+                
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" placeholder="Enter your full name" value="Tiffany">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="age">Age (Years)</label>
+                        <input type="number" id="age" value="37">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Biological Sex</label>
+                        <select id="gender">
+                            <option value="female" selected>Female</option>
+                            <option value="male">Male</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" value="172">
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" value="62">
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <div></div>
+                    <button class="btn-primary" onclick="nextStep(2)">Proceed to Baseline</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Metabolic Baseline & Activity Profiling -->
+            <div class="step-container" id="step2">
+                <h2>Metabolic Baseline & Activity</h2>
+                <p class="subtitle">Evaluate daily thermogenesis, occupational stress vectors, and circadian restorative baselines.</p>
+                
+                <div class="form-group">
+                    <label for="activityLevel">Daily NEAT & Movement Intensity</label>
+                    <select id="activityLevel">
+                        <option value="1.2">Sedentary (Desk-bound, minimal movement)</option>
+                        <option value="1.375" selected>Lightly Active (1-3 structured sessions/wk)</option>
+                        <option value="1.55">Moderately Active (3-5 structured sessions/wk)</option>
+                        <option value="1.725">Highly Active (Daily high-intensity exertion)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sleepHours">Average Nightly Sleep (Hours)</label>
+                    <input type="number" id="sleepHours" value="7.5" step="0.5">
+                </div>
+
+                <div class="form-group">
+                    <label for="stressVector">Occupational & Lifestyle Stress Index</label>
+                    <select id="stressVector">
+                        <option value="low">Low (Balanced recovery capacity)</option>
+                        <option value="moderate" selected>Moderate (Standard entrepreneurial load)</option>
+                        <option value="high">High (Intense cognitive/physical demand)</option>
+                    </select>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-secondary" onclick="prevStep(1)">Back</button>
+                    <button class="btn-primary" onclick="nextStep(3)">Configure TEB Nutrition</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Dietary Architecture & TEB Preference Mapping -->
+            <div class="step-container" id="step3">
+                <h2>Dietary Architecture & TEB</h2>
+                <p class="subtitle">Align macronutrient distributions strictly with The Eating Bible (TEB) bioenergetic framework.</p>
+                
+                <div class="form-group">
+                    <label for="tebProtocol">Primary TEB Protocol</label>
+                    <select id="tebProtocol">
+                        <option value="sovereign" selected>Sovereign Bioenergetic Stabilization</option>
+                        <option value="ketogenic">Ketogenic Mitochondrial Reset</option>
+                        <option value="carnivore">Primal Carnivore Elimination</option>
+                        <option value="cyclical">Circadian Cyclical Carbohydrate Integration</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="mealFrequency">Target Meal Frequency</label>
+                    <select id="mealFrequency">
+                        <option value="2">2 Meals (Time-Restricted Feeding / 16:8)</option>
+                        <option value="3" selected>3 Meals (Circadian Aligned)</option>
+                        <option value="4">4 Meals (Distributed Protein Synthesis)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="hydrationTarget">Hydration Index Target (Liters/Day)</label>
+                    <input type="number" id="hydrationTarget" value="3.0" step="0.25">
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-secondary" onclick="prevStep(2)">Back</button>
+                    <button class="btn-primary" onclick="nextStep(4)">Initialize RAFL Vault</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: RAFL Vault & Photo Ingestion Calibration -->
+            <div class="step-container" id="step4">
+                <h2>RAFL Vault & Photo Ingestion</h2>
+                <p class="subtitle">Calibrate visual recognition sensors for instantaneous meal logging and biometric metrics.</p>
+                
+                <div class="camera-simulation">
+                    <span style="z-index: 2; font-size: 0.9rem; letter-spacing: 0.1em; color: var(--accent-gold);">[RAFL OPTICAL SENSOR READY]</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="simulatedMeal">Simulate Meal Upload or Search Query</label>
+                    <input type="text" id="simulatedMeal" value="Grass-fed ribeye steak, pasture butter, avocado & eggs">
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-secondary" onclick="prevStep(3)">Back</button>
+                    <button class="btn-primary" onclick="nextStep(5)">Calibrate Resistance Engine</button>
+                </div>
+            </div>
+
+            <!-- STEP 5: Zero-Equipment Resistance Training Assessment -->
+            <div class="step-container" id="step5">
+                <h2>Zero-Equipment Resistance Engine</h2>
+                <p class="subtitle">Calibrate mechanical disadvantage, time-under-tension, and joint health parameters.</p>
+                
+                <div class="form-group">
+                    <label for="trainingFocus">Primary Adaptation Focus</label>
+                    <select id="trainingFocus">
+                        <option value="hypertrophy" selected>Myofibrillar Hypertrophy & Tone</option>
+                        <option value="endurance">Mitochondrial Density & Endurance</option>
+                        <option value="rehab">Joint Integrity & Neuromuscular Re-education</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="jointStatus">Articular / Joint Limitation Check</label>
+                    <select id="jointStatus">
+                        <option value="none" selected>Unrestricted (Full kinetic chain access)</option>
+                        <option value="wrist">Strict Wrist Mitigation Required</option>
+                        <option value="knee">Lower Kinetic Chain Adaptation</option>
+                    </select>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-secondary" onclick="prevStep(4)">Back</button>
+                    <button class="btn-primary" onclick="completeOnboarding()">Generate Master Dashboard</button>
+                </div>
+            </div>
+
+            <!-- STEP 6: Personalized Bioenergetic Master Dashboard -->
+            <div class="step-container" id="step6">
+                <span class="pill">● TEB Master Engine Active</span>
+                <h2>Bioenergetic Command Dashboard</h2>
+                <p class="subtitle">Your personalized sovereign metabolic parameters are fully synthesized.</p>
+                
+                <div class="dashboard-grid">
+                    <div class="metric-card">
+                        <span class="metric-title">Daily Energy Budget</span>
+                        <span class="metric-value" id="valCalories">2,140</span>
+                        <span class="metric-sub">Kcal (Dynamic TDEE)</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-title">Protein Allocation</span>
+                        <span class="metric-value" id="valProtein">145</span>
+                        <span class="metric-sub">Grams (TEB Optimal)</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-title">Hydration Status</span>
+                        <span class="metric-value">3.0 L</span>
+                        <span class="metric-sub">Electrolytes Balanced</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-title">Adaptive State</span>
+                        <span class="metric-value" style="font-size: 1.2rem; color: var(--success);">Sovereign</span>
+                        <span class="metric-sub">Phase 1 Optimization</span>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="triggerRAFLScan()">
+                    <strong style="color: var(--accent-gold); display: block; margin-bottom: 0.25rem;">+ Execute RAFL Meal Scan</strong>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Instant optical parsing and macronutrient breakdown</span>
+                </div>
+
+                <div class="action-card" onclick="triggerWorkoutFlow()" style="background: rgba(16, 185, 129, 0.03); border-color: rgba(16, 185, 129, 0.2);">
+                    <strong style="color: var(--success); display: block; margin-bottom: 0.25rem;">⚡ Start Zero-Equipment Flow</strong>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Time-under-tension bodyweight neural activation</span>
+                </div>
+
+                <div class="btn-group" style="margin-top: 1.5rem;">
+                    <button class="btn-secondary" onclick="resetApp()">Recalibrate Parameters</button>
+                    <button class="btn-primary" onclick="alert('Session synchronized with The Eating Bible backend.')">Sync State</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 6;
+
+        function updateProgress() {
+            const percentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            
+            if (currentStep < 6) {
+                document.getElementById('navStatus').innerText = `Onboarding: Step ${currentStep} of ${totalSteps}`;
+            } else {
+                document.getElementById('navStatus').innerText = `Status: Master Dashboard Active`;
+            }
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            currentStep = step;
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextStep(step) {
+            if (step === 6) {
+                calculateDashboard();
+            }
+            showStep(step);
+        }
+
+        function prevStep(step) {
+            showStep(step);
+        }
+
+        function completeOnboarding() {
+            calculateDashboard();
+            showStep(6);
+        }
+
+        function calculateDashboard() {
+            const weight = parseFloat(document.getElementById('weight').value) || 62;
+            const height = parseFloat(document.getElementById('height').value) || 172;
+            const age = parseInt(document.getElementById('age').value) || 37;
+            const activity = parseFloat(document.getElementById('activityLevel').value) || 1.375;
+
+            // Mifflin-St Jeor Equation for Females
+            let bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+            let tdee = Math.round(bmr * activity);
+            let protein = Math.round(weight * 2.2 * 1.05);
+
+            document.getElementById('valCalories').innerText = tdee.toLocaleString();
+            document.getElementById('valProtein').innerText = protein;
+        }
+
+        function triggerRAFLScan() {
+            const query = document.getElementById('simulatedMeal').value;
+            alert(`[RAFL Vault] Successfully scanned: "${query}"\nMacronutrients logged: 48g Protein, 32g Fat, 6g Carbohydrates. Energy state updated.`);
+        }
+
+        function triggerWorkoutFlow() {
+            alert('[Resistance Engine] Initializing zero-equipment time-under-tension sequence: Isometric Push-to-Failure & Slow Eccentric Squat Flow.');
+        }
+
+        function resetApp() {
+            showStep(1);
+        }
+    </script>
 </body>
 </html>
